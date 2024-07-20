@@ -24,7 +24,7 @@ pub const Snake = struct {
     pos: ray.Vector2,
     size: ray.Vector2,
     direction: Direction,
-    pub fn changeDirection(self: *Snake, direction: Direction) void {
+    fn changeDirection(self: *Snake, direction: Direction) void {
         self.direction = direction;
     }
     pub fn moveSnake(self: *Snake, delta: f32) !void {
@@ -47,5 +47,14 @@ pub const Snake = struct {
     }
     pub fn drawSnake(self: *Snake) !void {
         ray.DrawRectangleV(self.pos, self.size, ray.BLUE);
+    }
+    pub fn handleKeys(self: *Snake, key: i32) void {
+        _ = switch(key) {
+            ray.KEY_LEFT => self.changeDirection(Direction.Left),
+            ray.KEY_RIGHT => self.changeDirection(Direction.Right),
+            ray.KEY_UP => self.changeDirection(Direction.Up),
+            ray.KEY_DOWN => self.changeDirection(Direction.Down),
+            else => undefined,
+        };
     }
 };

@@ -23,13 +23,12 @@ pub fn main() !void {
         ray.DrawFPS(100, 200);
         const delta = ray.GetFrameTime();
 
-        _ = switch (ray.GetKeyPressed()) {
-            ray.KEY_LEFT => snake.changeDirection(Direction.Left),
-            ray.KEY_RIGHT => snake.changeDirection(Direction.Right),
-            ray.KEY_UP => snake.changeDirection(Direction.Up),
-            ray.KEY_DOWN => snake.changeDirection(Direction.Down),
-            else => undefined,
+        const pressedKey = ray.GetKeyPressed();
+        _ = switch (pressedKey) {
+            ray.KEY_LEFT, ray.KEY_RIGHT, ray.KEY_UP, ray.KEY_DOWN => snake.handleKeys(pressedKey),
+            else => {},
         };
+
         try snake.drawSnake();
         try snake.moveSnake(delta);
     }
