@@ -13,7 +13,7 @@ pub const Direction = enum {
     Left,
     Right,
     pub fn isOpposite(self: Direction, other: Direction) bool {
-        return switch(self) {
+        return switch (self) {
             .Up => other == .Down,
             .Down => other == .Up,
             .Right => other == .Left,
@@ -33,10 +33,7 @@ pub const Snake = struct {
     size: ray.Vector2,
     direction: Direction,
     fn turn(self: *Snake, direction: Direction) void {
-        if (direction == self.direction) {
-            return;
-        }
-        if (direction.isOpposite(self.direction)) {
+        if (direction.isOpposite(self.direction) or direction == self.direction) {
             return;
         }
         self.direction = direction;
