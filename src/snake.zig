@@ -49,7 +49,7 @@ pub const Snake = struct {
         ray.DrawRectangleV(self.pos, self.size, ray.BLUE);
     }
     pub fn handleKeys(self: *Snake, key: i32) void {
-        _ = switch(key) {
+        _ = switch (key) {
             ray.KEY_LEFT => self.changeDirection(Direction.Left),
             ray.KEY_RIGHT => self.changeDirection(Direction.Right),
             ray.KEY_UP => self.changeDirection(Direction.Up),

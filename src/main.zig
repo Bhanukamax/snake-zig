@@ -25,7 +25,15 @@ pub fn main() !void {
 
         const pressedKey = ray.GetKeyPressed();
         _ = switch (pressedKey) {
-            ray.KEY_LEFT, ray.KEY_RIGHT, ray.KEY_UP, ray.KEY_DOWN => snake.handleKeys(pressedKey),
+            ray.KEY_J,
+            ray.KEY_K,
+            ray.KEY_L,
+            ray.KEY_I,
+            ray.KEY_LEFT,
+            ray.KEY_RIGHT,
+            ray.KEY_UP,
+            ray.KEY_DOWN,
+            => snake.handleKeys(pressedKey),
             else => {},
         };
 
