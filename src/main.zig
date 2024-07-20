@@ -48,34 +48,34 @@ const Snake = struct {
     }
 };
 
-pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+fn newSnake() Snake {
+    const sizeVec = ray.Vector2{ .x = size, .y = size };
+    const pos = ray.Vector2{ .x = 20.0, .y = 20.0 };
+    return Snake{ .pos = pos, .size = sizeVec, .direction = Direction.Down };
+}
 
+pub fn main() !void {
     ray.InitWindow(width, height, "Hello");
     defer ray.CloseWindow();
     ray.SetTargetFPS(120);
-    const sizeVec = ray.Vector2 { .x = size, .y = size};
-    const pos = ray.Vector2 { .x = 20.0, .y = 20.0};
-    var snake = Snake{.pos = pos, .size = sizeVec, .direction = Direction.Down};
+    var snake = newSnake();
 
-    while(!ray.WindowShouldClose()) {
+    while (!ray.WindowShouldClose()) {
         ray.BeginDrawing();
         defer ray.EndDrawing();
         ray.ClearBackground(ray.WHITE);
 
         ray.DrawFPS(100, 200);
         const delta = ray.GetFrameTime();
-        
-        _ = switch(ray.GetKeyPressed()) {
+
+        _ = switch (ray.GetKeyPressed()) {
             ray.KEY_LEFT => snake.changeDirection(Direction.Left),
             ray.KEY_RIGHT => snake.changeDirection(Direction.Right),
             ray.KEY_UP => snake.changeDirection(Direction.Up),
             ray.KEY_DOWN => snake.changeDirection(Direction.Down),
-            else => undefined
+            else => undefined,
         };
         try snake.drawSnake();
         try snake.moveSnake(delta);
     }
 }
-
