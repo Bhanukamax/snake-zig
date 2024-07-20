@@ -12,29 +12,43 @@ pub const Direction = enum {
     Down,
     Left,
     Right,
+    pub fn isOpposite(self: Direction, other: Direction) bool {
+        return switch(self) {
+            .Up => other == .Down,
+            .Down => other == .Up,
+            .Right => other == .Left,
+            .Left => other == .Right,
+        };
+    }
 };
 
 pub fn newSnake() Snake {
     const sizeVec = ray.Vector2{ .x = size, .y = size };
     const pos = ray.Vector2{ .x = 20.0, .y = 20.0 };
-    return Snake{ .pos = pos, .size = sizeVec, .direction = Direction.Down };
+    return Snake{ .pos = pos, .size = sizeVec, .direction = .Down };
 }
 
 pub const Snake = struct {
     pos: ray.Vector2,
     size: ray.Vector2,
     direction: Direction,
-    fn changeDirection(self: *Snake, direction: Direction) void {
+    fn turn(self: *Snake, direction: Direction) void {
+        if (direction == self.direction) {
+            return;
+        }
+        if (direction.isOpposite(self.direction)) {
+            return;
+        }
         self.direction = direction;
     }
     pub fn moveSnake(self: *Snake, delta: f32) !void {
         elapsTime += delta;
         if (elapsTime > 0.2) {
             switch (self.direction) {
-                Direction.Up => self.pos.y -= size,
-                Direction.Down => self.pos.y += size,
-                Direction.Left => self.pos.x -= size,
-                Direction.Right => self.pos.x += size,
+                .Up => self.pos.y -= size,
+                .Down => self.pos.y += size,
+                .Left => self.pos.x -= size,
+                .Right => self.pos.x += size,
             }
             elapsTime = 0;
         }
@@ -50,10 +64,10 @@ pub const Snake = struct {
     }
     pub fn handleKeys(self: *Snake, key: i32) void {
         _ = switch (key) {
-            ray.KEY_LEFT => self.changeDirection(Direction.Left),
-            ray.KEY_RIGHT => self.changeDirection(Direction.Right),
-            ray.KEY_UP => self.changeDirection(Direction.Up),
-            ray.KEY_DOWN => self.changeDirection(Direction.Down),
+            ray.KEY_LEFT, ray.KEY_J => self.turn(.Left),
+            ray.KEY_RIGHT, ray.KEY_L => self.turn(.Right),
+            ray.KEY_UP, ray.KEY_I => self.turn(.Up),
+            ray.KEY_DOWN, ray.KEY_K => self.turn(.Down),
             else => undefined,
         };
     }
