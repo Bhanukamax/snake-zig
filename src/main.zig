@@ -28,6 +28,12 @@ fn drawGrid() void {
     }
 }
 
+fn drawEndScreen() void {
+    c.ClearBackground(c.RAYWHITE);
+    c.DrawText("GAME OVER", 10, 10, 30, c.BLUE);
+    c.DrawText("Press R to Restart", 10, 100, 18, c.RED);
+}
+
 pub fn main() !void {
     c.InitWindow(width, height, "Hello");
     defer c.CloseWindow();
@@ -42,9 +48,8 @@ pub fn main() !void {
         c.BeginDrawing();
         defer c.EndDrawing();
         c.ClearBackground(c.WHITE);
-        drawGrid();
 
-        c.DrawFPS(10, 10);
+        // c.DrawFPS(10, 10);
         const delta = c.GetFrameTime();
 
         const pressedKey = c.GetKeyPressed();
@@ -58,10 +63,28 @@ pub fn main() !void {
             c.KEY_UP,
             c.KEY_DOWN,
             => snake.handleKeys(pressedKey),
+            c.KEY_R,
+            => if (snake.state == .GameOver) {
+                snake.state = .Restart;
+            },
             else => {},
         };
 
-        try snake.draw();
-        try snake.moveSnake(delta);
+        switch (snake.state) {
+            .GameOver => {
+                c.ClearBackground(c.RAYWHITE);
+                drawEndScreen();
+            },
+            .Playing => {
+                drawGrid();
+                try snake.draw();
+                try snake.moveSnake(delta);
+            },
+            .Restart => {
+                snake.deinit();
+                snake = try snake_.newSnake(snake.allocator);
+            },
+            .Pause => {}
+        }
     }
 }

@@ -52,6 +52,7 @@ pub const Direction = enum {
 
 const GameState = enum {
     Playing,
+    Restart,
     GameOver,
     Pause,
 };
