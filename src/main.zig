@@ -33,7 +33,7 @@ pub fn main() !void {
     ray.InitWindow(width, height, "Hello");
     defer ray.CloseWindow();
     ray.SetTargetFPS(120);
-    var snake = snake_.newSnake();
+    var snake = try snake_.newSnake();
 
     while (!ray.WindowShouldClose()) {
         ray.BeginDrawing();

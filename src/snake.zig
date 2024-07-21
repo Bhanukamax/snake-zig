@@ -22,13 +22,27 @@ pub const Direction = enum {
     }
 };
 
-pub fn newSnake() Snake {
+pub fn newSnake() !Snake {
     const sizeVec = ray.Vector2{ .x = size, .y = size };
     const pos = ray.Vector2{ .x = 20.0, .y = 20.0 };
-    return Snake{ .pos = pos, .size = sizeVec, .direction = .Down };
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    // TODO: see if possible to do this without explicitly passing the allocator
+    var body: std.ArrayList(ray.Vector2) = std
+        .ArrayList(ray.Vector2)
+        .init(gpa.allocator());
+    try body.append(ray.Vector2{ .x = 2, .y = 2 });
+    try body.append(ray.Vector2{ .x = 2, .y = 1 });
+    try body.append(ray.Vector2{ .x = 3, .y = 1 });
+    return Snake{
+        .pos = pos,
+        .size = sizeVec,
+        .direction = .Down,
+        .body = body,
+    };
 }
 
 pub const Snake = struct {
+    body: std.ArrayList(ray.Vector2),
     pos: ray.Vector2,
     size: ray.Vector2,
     direction: Direction,
@@ -47,6 +61,16 @@ pub const Snake = struct {
                 .Left => self.pos.x -= size,
                 .Right => self.pos.x += size,
             }
+            const head = self.body.pop();
+            try self.body.append(head);
+            const newHead = switch (self.direction) {
+                .Up => ray.Vector2{.x = head.x, .y = head.y - 1},
+                .Down => ray.Vector2{.x = head.x, .y = head.y + 1},
+                .Left => ray.Vector2{.x = head.x - 1, .y = head.y},
+                .Right => ray.Vector2{.x = head.x + 1, .y = head.y},
+            };
+            try self.body.append(newHead);
+            _  = self.body.orderedRemove(0);
             elapsTime = 0;
         }
         var buf: [1000]u8 = undefined;
@@ -57,7 +81,17 @@ pub const Snake = struct {
         ray.DrawText(&buf, 100, 100, 30, ray.GRAY);
     }
     pub fn drawSnake(self: *Snake) !void {
+        // drawing old snake brick
         ray.DrawRectangleV(self.pos, self.size, ray.BLUE);
+        // drawing new snake
+        for (self.body.items) |cell| {
+            const cellPos =
+                ray.Vector2{
+                .x = @floatCast(self.size.x * cell.x),
+                .y = @floatCast(self.size.y * cell.y),
+            };
+            ray.DrawRectangleV(cellPos, self.size, ray.GREEN);
+        }
     }
     pub fn handleKeys(self: *Snake, key: i32) void {
         _ = switch (key) {
