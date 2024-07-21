@@ -10,6 +10,14 @@ fn vec(x: f32, y: f32) c.Vector2 {
     return c.Vector2{ .x = x, .y = y };
 }
 
+fn getRandomCell() c.Vector2 {
+    const rand = std.crypto.random;
+    return vec(
+        @floatFromInt(rand.intRangeAtMost(i32, 0, consts.gridCols - 1)),
+        @floatFromInt(rand.intRangeAtMost(i32, 0, consts.gridRows - 1)),
+    );
+}
+
 fn debug(value: anytype) !void {
     var buf: [1000]u8 = undefined;
     const formated = try std.fmt.bufPrint(&buf, "direction: {}", .{value});
@@ -67,13 +75,19 @@ pub const Snake = struct {
     pub fn deinit(self: *Snake) void {
         self.body.deinit();
     }
+    fn isSnakeBody(self: *Snake, target: c.Vector2) bool {
+        for (self.body.items) |item| {
+            if (item.x == target.x and item.y == target.y) return true;
+        }
+        return false;
+    }
     fn placeApple(self: *Snake) void {
-        const rand = std.crypto.random;
         if (self.apple == null) {
-            const x: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, consts.gridCols - 1));
-            const y: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, consts.gridRows - 1));
-
-            self.apple = vec(x, y);
+            var target = getRandomCell();
+            while (self.isSnakeBody(target)) {
+                target = getRandomCell();
+            }
+            self.apple = target;
         }
     }
     fn turn(self: *Snake, direction: Direction) void {
