@@ -24,7 +24,6 @@ pub const Direction = enum {
 
 pub fn newSnake() !Snake {
     const sizeVec = ray.Vector2{ .x = size, .y = size };
-    const pos = ray.Vector2{ .x = 20.0, .y = 20.0 };
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     // TODO: see if possible to do this without explicitly passing the allocator
     var body: std.ArrayList(ray.Vector2) = std
@@ -34,7 +33,6 @@ pub fn newSnake() !Snake {
     try body.append(ray.Vector2{ .x = 2, .y = 1 });
     try body.append(ray.Vector2{ .x = 3, .y = 1 });
     return Snake{
-        .pos = pos,
         .size = sizeVec,
         .direction = .Down,
         .body = body,
@@ -43,7 +41,6 @@ pub fn newSnake() !Snake {
 
 pub const Snake = struct {
     body: std.ArrayList(ray.Vector2),
-    pos: ray.Vector2,
     size: ray.Vector2,
     direction: Direction,
     fn turn(self: *Snake, direction: Direction) void {
@@ -55,12 +52,6 @@ pub const Snake = struct {
     pub fn moveSnake(self: *Snake, delta: f32) !void {
         elapsTime += delta;
         if (elapsTime > 0.2) {
-            switch (self.direction) {
-                .Up => self.pos.y -= size,
-                .Down => self.pos.y += size,
-                .Left => self.pos.x -= size,
-                .Right => self.pos.x += size,
-            }
             const head = self.body.pop();
             try self.body.append(head);
             const newHead = switch (self.direction) {
@@ -81,9 +72,6 @@ pub const Snake = struct {
         ray.DrawText(&buf, 100, 100, 30, ray.GRAY);
     }
     pub fn drawSnake(self: *Snake) !void {
-        // drawing old snake brick
-        ray.DrawRectangleV(self.pos, self.size, ray.BLUE);
-        // drawing new snake
         for (self.body.items) |cell| {
             const cellPos =
                 ray.Vector2{
