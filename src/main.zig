@@ -32,7 +32,10 @@ pub fn main() !void {
     c.InitWindow(width, height, "Hello");
     defer c.CloseWindow();
     c.SetTargetFPS(120);
-    var snake = try snake_.newSnake();
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+    var snake = try snake_.newSnake(&gpa.allocator());
 
     while (!c.WindowShouldClose()) {
         c.BeginDrawing();
