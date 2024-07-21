@@ -5,6 +5,13 @@ var elapsTime: f32 = 0;
 const speed = 50;
 const size: f32 = 20.0;
 
+fn debug(value: anytype) !void {
+    var buf: [1000]u8 = undefined;
+    const formated = try std.fmt.bufPrint(&buf, "direction: {}", .{value});
+    buf[formated.len] = 0;
+    c.DrawText(&buf, 100, 100, 30, c.GRAY);
+}
+
 pub const Direction = enum {
     Up,
     Down,
@@ -62,12 +69,7 @@ pub const Snake = struct {
             _  = self.body.orderedRemove(0);
             elapsTime = 0;
         }
-        var buf: [1000]u8 = undefined;
-
-        const formated = try std.fmt.bufPrint(&buf, "direction: {}", .{self.direction});
-        buf[formated.len] = 0;
-
-        c.DrawText(&buf, 100, 100, 30, c.GRAY);
+        try debug(self.direction);
     }
     pub fn drawSnake(self: *Snake) !void {
         for (self.body.items) |cell| {
