@@ -12,6 +12,15 @@ fn debug(value: anytype) !void {
     c.DrawText(&buf, 100, 100, 30, c.GRAY);
 }
 
+fn drawCell(cell: c.Vector2, cellSize: c.Vector2, color: c.Color) void {
+    const cellPos =
+        c.Vector2{
+            .x = @floatCast(cellSize.x * cell.x),
+            .y = @floatCast(cellSize.y * cell.y),
+        };
+    c.DrawRectangleV(cellPos, cellSize, color);
+}
+
 pub const Direction = enum {
     Up,
     Down,
@@ -41,6 +50,7 @@ pub fn newSnake() !Snake {
         .size = sizeVec,
         .direction = .Down,
         .body = body,
+        .apple = null,
     };
 }
 
@@ -48,6 +58,16 @@ pub const Snake = struct {
     body: std.ArrayList(c.Vector2),
     size: c.Vector2,
     direction: Direction,
+    apple: ?c.Vector2,
+    fn placeApple(self: *Snake) void {
+        const rand = std.crypto.random;
+        if (self.apple == null) {
+            const x: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, 20));
+            const y: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, 20));
+            
+            self.apple = c.Vector2{.x = x, .y = y };
+        }
+    }
     fn turn(self: *Snake, direction: Direction) void {
         if (direction.isOpposite(self.direction) or direction == self.direction) {
             return;
@@ -55,6 +75,7 @@ pub const Snake = struct {
         self.direction = direction;
     }
     pub fn moveSnake(self: *Snake, delta: f32) !void {
+        self.placeApple();
         elapsTime += delta;
         if (elapsTime > 0.2) {
             const head = self.body.pop();
@@ -73,12 +94,11 @@ pub const Snake = struct {
     }
     pub fn drawSnake(self: *Snake) !void {
         for (self.body.items) |cell| {
-            const cellPos =
-                c.Vector2{
-                .x = @floatCast(self.size.x * cell.x),
-                .y = @floatCast(self.size.y * cell.y),
-            };
-            c.DrawRectangleV(cellPos, self.size, c.GREEN);
+            drawCell(cell, self.size, c.GREEN);
+        }
+        if (self.apple) |apple|
+        {
+            drawCell(apple, self.size, c.RED);
         }
     }
     pub fn handleKeys(self: *Snake, key: i32) void {
