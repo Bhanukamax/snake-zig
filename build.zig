@@ -1,4 +1,5 @@
 const std = @import("std");
+const exeName = "snake";
 
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
@@ -16,7 +17,7 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const lib = b.addStaticLibrary(.{
-        .name = "rayball",
+        .name = exeName,
         // In this case the main source file is merely a path, however, in more
         // complicated build scripts, this could be a generated file.
         .root_source_file = .{ .path = "src/root.zig" },
@@ -30,7 +31,7 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(lib);
 
     const exe = b.addExecutable(.{
-        .name = "rayball",
+        .name = exeName,
         .root_source_file = .{ .path = "src/main.zig" },
         .target = target,
         .optimize = optimize,
