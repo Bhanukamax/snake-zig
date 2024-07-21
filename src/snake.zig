@@ -1,7 +1,5 @@
 const std = @import("std");
-const ray = @cImport({
-    @cInclude("raylib.h");
-});
+const c = @import("c.zig");
 
 var elapsTime: f32 = 0;
 const speed = 50;
@@ -23,15 +21,15 @@ pub const Direction = enum {
 };
 
 pub fn newSnake() !Snake {
-    const sizeVec = ray.Vector2{ .x = size, .y = size };
+    const sizeVec = c.Vector2{ .x = size, .y = size };
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     // TODO: see if possible to do this without explicitly passing the allocator
-    var body: std.ArrayList(ray.Vector2) = std
-        .ArrayList(ray.Vector2)
+    var body: std.ArrayList(c.Vector2) = std
+        .ArrayList(c.Vector2)
         .init(gpa.allocator());
-    try body.append(ray.Vector2{ .x = 2, .y = 2 });
-    try body.append(ray.Vector2{ .x = 2, .y = 1 });
-    try body.append(ray.Vector2{ .x = 3, .y = 1 });
+    try body.append(c.Vector2{ .x = 2, .y = 2 });
+    try body.append(c.Vector2{ .x = 2, .y = 1 });
+    try body.append(c.Vector2{ .x = 3, .y = 1 });
     return Snake{
         .size = sizeVec,
         .direction = .Down,
@@ -40,8 +38,8 @@ pub fn newSnake() !Snake {
 }
 
 pub const Snake = struct {
-    body: std.ArrayList(ray.Vector2),
-    size: ray.Vector2,
+    body: std.ArrayList(c.Vector2),
+    size: c.Vector2,
     direction: Direction,
     fn turn(self: *Snake, direction: Direction) void {
         if (direction.isOpposite(self.direction) or direction == self.direction) {
@@ -55,10 +53,10 @@ pub const Snake = struct {
             const head = self.body.pop();
             try self.body.append(head);
             const newHead = switch (self.direction) {
-                .Up => ray.Vector2{.x = head.x, .y = head.y - 1},
-                .Down => ray.Vector2{.x = head.x, .y = head.y + 1},
-                .Left => ray.Vector2{.x = head.x - 1, .y = head.y},
-                .Right => ray.Vector2{.x = head.x + 1, .y = head.y},
+                .Up => c.Vector2{.x = head.x, .y = head.y - 1},
+                .Down => c.Vector2{.x = head.x, .y = head.y + 1},
+                .Left => c.Vector2{.x = head.x - 1, .y = head.y},
+                .Right => c.Vector2{.x = head.x + 1, .y = head.y},
             };
             try self.body.append(newHead);
             _  = self.body.orderedRemove(0);
@@ -69,24 +67,24 @@ pub const Snake = struct {
         const formated = try std.fmt.bufPrint(&buf, "direction: {}", .{self.direction});
         buf[formated.len] = 0;
 
-        ray.DrawText(&buf, 100, 100, 30, ray.GRAY);
+        c.DrawText(&buf, 100, 100, 30, c.GRAY);
     }
     pub fn drawSnake(self: *Snake) !void {
         for (self.body.items) |cell| {
             const cellPos =
-                ray.Vector2{
+                c.Vector2{
                 .x = @floatCast(self.size.x * cell.x),
                 .y = @floatCast(self.size.y * cell.y),
             };
-            ray.DrawRectangleV(cellPos, self.size, ray.GREEN);
+            c.DrawRectangleV(cellPos, self.size, c.GREEN);
         }
     }
     pub fn handleKeys(self: *Snake, key: i32) void {
         _ = switch (key) {
-            ray.KEY_LEFT, ray.KEY_J => self.turn(.Left),
-            ray.KEY_RIGHT, ray.KEY_L => self.turn(.Right),
-            ray.KEY_UP, ray.KEY_I => self.turn(.Up),
-            ray.KEY_DOWN, ray.KEY_K => self.turn(.Down),
+            c.KEY_LEFT, c.KEY_J => self.turn(.Left),
+            c.KEY_RIGHT, c.KEY_L => self.turn(.Right),
+            c.KEY_UP, c.KEY_I => self.turn(.Up),
+            c.KEY_DOWN, c.KEY_K => self.turn(.Down),
             else => undefined,
         };
     }

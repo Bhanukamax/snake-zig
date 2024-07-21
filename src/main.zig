@@ -1,8 +1,6 @@
 const std = @import("std");
+const c = @import("c.zig");
 const snake_ = @import("snake.zig");
-const ray = @cImport({
-    @cInclude("raylib.h");
-});
 
 const cellSize = 20;
 const gridCols = 20;
@@ -17,8 +15,8 @@ fn drawGrid() void {
         inline for (0..gridRows) |row| {
             const x = col * cellSize;
             const y = row * cellSize;
-            const color = if ((col + row) % 2 == 0) ray.RAYWHITE else ray.WHITE;
-            ray.DrawRectangle(
+            const color = if ((col + row) % 2 == 0) c.RAYWHITE else c.WHITE;
+            c.DrawRectangle(
                 @intCast(x),
                 @intCast(y),
                 @intCast(x + cellSize),
@@ -30,30 +28,30 @@ fn drawGrid() void {
 }
 
 pub fn main() !void {
-    ray.InitWindow(width, height, "Hello");
-    defer ray.CloseWindow();
-    ray.SetTargetFPS(120);
+    c.InitWindow(width, height, "Hello");
+    defer c.CloseWindow();
+    c.SetTargetFPS(120);
     var snake = try snake_.newSnake();
 
-    while (!ray.WindowShouldClose()) {
-        ray.BeginDrawing();
-        defer ray.EndDrawing();
-        ray.ClearBackground(ray.WHITE);
+    while (!c.WindowShouldClose()) {
+        c.BeginDrawing();
+        defer c.EndDrawing();
+        c.ClearBackground(c.WHITE);
         drawGrid();
 
-        ray.DrawFPS(100, 200);
-        const delta = ray.GetFrameTime();
+        c.DrawFPS(100, 200);
+        const delta = c.GetFrameTime();
 
-        const pressedKey = ray.GetKeyPressed();
+        const pressedKey = c.GetKeyPressed();
         _ = switch (pressedKey) {
-            ray.KEY_J,
-            ray.KEY_K,
-            ray.KEY_L,
-            ray.KEY_I,
-            ray.KEY_LEFT,
-            ray.KEY_RIGHT,
-            ray.KEY_UP,
-            ray.KEY_DOWN,
+            c.KEY_J,
+            c.KEY_K,
+            c.KEY_L,
+            c.KEY_I,
+            c.KEY_LEFT,
+            c.KEY_RIGHT,
+            c.KEY_UP,
+            c.KEY_DOWN,
             => snake.handleKeys(pressedKey),
             else => {},
         };
