@@ -85,7 +85,7 @@ pub const Snake = struct {
     pub fn deinit(self: *Snake) void {
         self.body.deinit();
     }
-    fn isSnakeBody(self: *Snake, target: c.Vector2) bool {
+    fn isOnSnake(self: *Snake, target: c.Vector2) bool {
         for (self.body.items) |item| {
             if (item.x == target.x and item.y == target.y) return true;
         }
@@ -94,7 +94,7 @@ pub const Snake = struct {
     fn placeApple(self: *Snake) void {
         if (self.apple == null) {
             var target = getRandomCell();
-            while (self.isSnakeBody(target)) {
+            while (self.isOnSnake(target)) {
                 target = getRandomCell();
             }
             self.apple = target;
@@ -123,7 +123,10 @@ pub const Snake = struct {
             };
 
             // End state
-            if (newHead.x < 0 or newHead.x > consts.gridRows - 1 or newHead.y < 0 or newHead.y > gridCols - 1) {
+            if (newHead.x < 0 or newHead.x > consts.gridRows - 1 or
+                newHead.y < 0 or newHead.y > gridCols - 1 or
+                self.isOnSnake(newHead))
+            {
                 self.state = .GameOver;
                 return;
             }
