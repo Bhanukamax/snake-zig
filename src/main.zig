@@ -4,10 +4,30 @@ const ray = @cImport({
     @cInclude("raylib.h");
 });
 
-const width = 500;
-const height = 400;
+const cellSize = 20;
+const gridCols = 20;
+const gridRows = 20;
+const width = cellSize * gridCols;
+const height = cellSize * gridRows;
 
 const Direction = snake_.Direction;
+
+fn drawGrid() void {
+    inline for (0..gridCols) |col| {
+        inline for (0..gridRows) |row| {
+            const x = col * cellSize;
+            const y = row * cellSize;
+            const color = if ((col + row) % 2 == 0) ray.RAYWHITE else ray.WHITE;
+            ray.DrawRectangle(
+                @intCast(x),
+                @intCast(y),
+                @intCast(x + cellSize),
+                @intCast(y + cellSize),
+                color,
+            );
+        }
+    }
+}
 
 pub fn main() !void {
     ray.InitWindow(width, height, "Hello");
@@ -19,6 +39,7 @@ pub fn main() !void {
         ray.BeginDrawing();
         defer ray.EndDrawing();
         ray.ClearBackground(ray.WHITE);
+        drawGrid();
 
         ray.DrawFPS(100, 200);
         const delta = ray.GetFrameTime();
