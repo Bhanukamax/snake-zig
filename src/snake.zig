@@ -63,8 +63,8 @@ pub const Snake = struct {
     fn placeApple(self: *Snake) void {
         const rand = std.crypto.random;
         if (self.apple == null) {
-            const x: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, 20));
-            const y: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, 20));
+            const x: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, consts.gridCols));
+            const y: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, consts.gridRows));
 
             self.apple = c.Vector2{ .x = x, .y = y };
         }
