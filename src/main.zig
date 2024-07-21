@@ -61,7 +61,7 @@ pub fn main() !void {
             else => {},
         };
 
-        try snake.drawSnake();
+        try snake.draw();
         try snake.moveSnake(delta);
     }
 }

@@ -2,6 +2,8 @@ const std = @import("std");
 const c = @import("c.zig");
 const consts = @import("const.zig");
 const cellSize = consts.cellSize;
+const gridCols = consts.gridCols;
+const gridRows = consts.gridRows;
 
 var elapsTime: f32 = 0;
 const speed = 100;
@@ -48,9 +50,14 @@ pub const Direction = enum {
     }
 };
 
+const GameState = enum {
+    Playing,
+    GameOver,
+    Pause,
+};
+
 pub fn newSnake(allocator: *const std.mem.Allocator) !Snake {
     const sizeVec = vec(cellSize, cellSize);
-    // TODO: see if possible to do this without explicitly passing the allocator
     var body: std.ArrayList(c.Vector2) = std
         .ArrayList(c.Vector2)
         .init(allocator.*);
@@ -63,6 +70,7 @@ pub fn newSnake(allocator: *const std.mem.Allocator) !Snake {
         .body = body,
         .apple = null,
         .allocator = allocator,
+        .state = .Playing,
     };
 }
 
@@ -72,6 +80,7 @@ pub const Snake = struct {
     direction: Direction,
     apple: ?c.Vector2,
     allocator: *const std.mem.Allocator,
+    state: GameState,
     pub fn deinit(self: *Snake) void {
         self.body.deinit();
     }
@@ -97,6 +106,9 @@ pub const Snake = struct {
         self.direction = direction;
     }
     pub fn moveSnake(self: *Snake, delta: f32) !void {
+        if (self.state != .Playing) {
+            return;
+        }
         self.placeApple();
         elapsTime += delta;
         if (elapsTime > 0.2) {
@@ -108,8 +120,17 @@ pub const Snake = struct {
                 .Left => vec(head.x - 1, head.y),
                 .Right => vec(head.x + 1, head.y),
             };
+
+            // End state
+            if (newHead.x < 0 or newHead.x > consts.gridRows - 1 or newHead.y < 0 or newHead.y > gridCols - 1) {
+                self.state = .GameOver;
+                return;
+            }
+
             try self.body.append(newHead);
-            if (newHead.x == self.apple.?.x and newHead.y == self.apple.?.y) {
+            const isEatingApple = newHead.x == self.apple.?.x and newHead.y == self.apple.?.y;
+            // Eating the apple
+            if (isEatingApple) {
                 self.apple = null;
                 self.placeApple();
             } else {
@@ -118,7 +139,7 @@ pub const Snake = struct {
             elapsTime = 0;
         }
     }
-    pub fn drawSnake(self: *Snake) !void {
+    pub fn draw(self: *Snake) !void {
         drawCell(vec(19, 19), vec(consts.cellSize, consts.cellSize), c.BLUE);
         for (self.body.items) |cell| {
             drawCell(cell, self.size, c.GREEN);
