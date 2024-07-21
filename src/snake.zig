@@ -65,6 +65,9 @@ pub const Snake = struct {
     direction: Direction,
     apple: ?c.Vector2,
     allocator: *const std.mem.Allocator,
+    pub fn deinit(self: *Snake) void{
+        self.body.deinit();
+    }
     fn placeApple(self: *Snake) void {
         const rand = std.crypto.random;
         if (self.apple == null) {

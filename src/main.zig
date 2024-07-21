@@ -36,6 +36,7 @@ pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     defer _ = gpa.deinit();
     var snake = try snake_.newSnake(&gpa.allocator());
+    defer snake.deinit();
 
     while (!c.WindowShouldClose()) {
         c.BeginDrawing();
