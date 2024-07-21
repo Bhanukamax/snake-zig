@@ -18,11 +18,10 @@ fn debug(value: anytype) !void {
 }
 
 fn drawCell(cell: c.Vector2, size: c.Vector2, color: c.Color) void {
-    const cellPos =
-        c.Vector2{
-        .x = @floatCast(size.x * cell.x),
-        .y = @floatCast(size.y * cell.y),
-    };
+    const cellPos = vec(
+        @floatCast(size.x * cell.x),
+        @floatCast(size.y * cell.y),
+    );
     c.DrawRectangleV(cellPos, size, color);
 }
 
@@ -42,7 +41,7 @@ pub const Direction = enum {
 };
 
 pub fn newSnake(allocator: *const std.mem.Allocator) !Snake {
-    const sizeVec = c.Vector2{ .x = cellSize, .y = cellSize };
+    const sizeVec = vec(cellSize, cellSize);
     // TODO: see if possible to do this without explicitly passing the allocator
     var body: std.ArrayList(c.Vector2) = std
         .ArrayList(c.Vector2)
@@ -65,7 +64,7 @@ pub const Snake = struct {
     direction: Direction,
     apple: ?c.Vector2,
     allocator: *const std.mem.Allocator,
-    pub fn deinit(self: *Snake) void{
+    pub fn deinit(self: *Snake) void {
         self.body.deinit();
     }
     fn placeApple(self: *Snake) void {
@@ -104,10 +103,9 @@ pub const Snake = struct {
             }
             elapsTime = 0;
         }
-        try debug(self.direction);
     }
     pub fn drawSnake(self: *Snake) !void {
-        drawCell(vec(19,19), vec(consts.cellSize, consts.cellSize), c.BLUE);
+        drawCell(vec(19, 19), vec(consts.cellSize, consts.cellSize), c.BLUE);
         for (self.body.items) |cell| {
             drawCell(cell, self.size, c.GREEN);
         }

@@ -44,7 +44,7 @@ pub fn main() !void {
         c.ClearBackground(c.WHITE);
         drawGrid();
 
-        c.DrawFPS(100, 200);
+        c.DrawFPS(10, 10);
         const delta = c.GetFrameTime();
 
         const pressedKey = c.GetKeyPressed();
