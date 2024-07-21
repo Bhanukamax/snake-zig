@@ -1,9 +1,10 @@
 const std = @import("std");
 const c = @import("c.zig");
+const consts =  @import("const.zig");
+const cellSize  = consts.cellSize ;
 
 var elapsTime: f32 = 0;
 const speed = 50;
-const size: f32 = 20.0;
 
 fn debug(value: anytype) !void {
     var buf: [1000]u8 = undefined;
@@ -12,13 +13,13 @@ fn debug(value: anytype) !void {
     c.DrawText(&buf, 100, 100, 30, c.GRAY);
 }
 
-fn drawCell(cell: c.Vector2, cellSize: c.Vector2, color: c.Color) void {
+fn drawCell(cell: c.Vector2, size: c.Vector2, color: c.Color) void {
     const cellPos =
         c.Vector2{
-            .x = @floatCast(cellSize.x * cell.x),
-            .y = @floatCast(cellSize.y * cell.y),
-        };
-    c.DrawRectangleV(cellPos, cellSize, color);
+        .x = @floatCast(size.x * cell.x),
+        .y = @floatCast(size.y * cell.y),
+    };
+    c.DrawRectangleV(cellPos, size, color);
 }
 
 pub const Direction = enum {
@@ -37,7 +38,7 @@ pub const Direction = enum {
 };
 
 pub fn newSnake() !Snake {
-    const sizeVec = c.Vector2{ .x = size, .y = size };
+    const sizeVec = c.Vector2{ .x = cellSize, .y = cellSize };
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     // TODO: see if possible to do this without explicitly passing the allocator
     var body: std.ArrayList(c.Vector2) = std
@@ -64,8 +65,8 @@ pub const Snake = struct {
         if (self.apple == null) {
             const x: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, 20));
             const y: f32 = @floatFromInt(rand.intRangeAtMost(i32, 0, 20));
-            
-            self.apple = c.Vector2{.x = x, .y = y };
+
+            self.apple = c.Vector2{ .x = x, .y = y };
         }
     }
     fn turn(self: *Snake, direction: Direction) void {
@@ -81,13 +82,18 @@ pub const Snake = struct {
             const head = self.body.pop();
             try self.body.append(head);
             const newHead = switch (self.direction) {
-                .Up => c.Vector2{.x = head.x, .y = head.y - 1},
-                .Down => c.Vector2{.x = head.x, .y = head.y + 1},
-                .Left => c.Vector2{.x = head.x - 1, .y = head.y},
-                .Right => c.Vector2{.x = head.x + 1, .y = head.y},
+                .Up => c.Vector2{ .x = head.x, .y = head.y - 1 },
+                .Down => c.Vector2{ .x = head.x, .y = head.y + 1 },
+                .Left => c.Vector2{ .x = head.x - 1, .y = head.y },
+                .Right => c.Vector2{ .x = head.x + 1, .y = head.y },
             };
             try self.body.append(newHead);
-            _  = self.body.orderedRemove(0);
+            if (newHead.x == self.apple.?.x and newHead.y == self.apple.?.y) {
+                self.apple = null;
+                self.placeApple();
+            } else {
+                _ = self.body.orderedRemove(0);
+            }
             elapsTime = 0;
         }
         try debug(self.direction);
@@ -96,8 +102,7 @@ pub const Snake = struct {
         for (self.body.items) |cell| {
             drawCell(cell, self.size, c.GREEN);
         }
-        if (self.apple) |apple|
-        {
+        if (self.apple) |apple| {
             drawCell(apple, self.size, c.RED);
         }
     }

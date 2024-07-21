@@ -2,11 +2,12 @@ const std = @import("std");
 const c = @import("c.zig");
 const snake_ = @import("snake.zig");
 
-const cellSize = 20;
-const gridCols = 20;
-const gridRows = 20;
-const width = cellSize * gridCols;
-const height = cellSize * gridRows;
+const consts =  @import("const.zig");
+const cellSize  = consts.cellSize ;
+const gridCols  = consts.gridCols ;
+const gridRows  = consts.gridRows ;
+const width  = consts.width ;
+const height  = consts.height ;
 
 const Direction = snake_.Direction;
 
