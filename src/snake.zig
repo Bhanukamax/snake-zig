@@ -20,6 +20,13 @@ fn getRandomCell() c.Vector2 {
     );
 }
 
+fn drawText(value: anytype, x: i32, y: i32, size: i32, color: c.Color) !void {
+    var buf: [1000]u8 = undefined;
+    const formated = try std.fmt.bufPrint(&buf, "{}", .{value});
+    buf[formated.len] = 0;
+    c.DrawText(&buf, x, y, size, color);
+}
+
 fn debug(value: anytype) !void {
     var buf: [1000]u8 = undefined;
     const formated = try std.fmt.bufPrint(&buf, "direction: {}", .{value});
@@ -72,6 +79,7 @@ pub fn newSnake(allocator: *const std.mem.Allocator) !Snake {
         .apple = null,
         .allocator = allocator,
         .state = .Playing,
+        .score = 0,
     };
 }
 
@@ -82,6 +90,7 @@ pub const Snake = struct {
     apple: ?c.Vector2,
     allocator: *const std.mem.Allocator,
     state: GameState,
+    score: i32,
     pub fn deinit(self: *Snake) void {
         self.body.deinit();
     }
@@ -136,6 +145,7 @@ pub const Snake = struct {
             // Eating the apple
             if (isEatingApple) {
                 self.apple = null;
+                self.score += 1;
                 self.placeApple();
             } else {
                 _ = self.body.orderedRemove(0);
@@ -151,6 +161,15 @@ pub const Snake = struct {
         if (self.apple) |apple| {
             drawCell(apple, self.size, c.RED);
         }
+        // Score
+        try drawText(self.score, 10, 10, 20, c.BLUE);
+    }
+    pub fn drawEndScreen(self: *Snake) !void {
+        c.ClearBackground(c.RAYWHITE);
+        c.DrawText("GAME OVER", 10, 10, 30, c.BLUE);
+        c.DrawText("Press R to Restart", 10, 100, 18, c.RED);
+        c.DrawText("Score: ", 50, 50, 20, c.BLUE);
+        try drawText(self.score, 130, 50, 20, c.BLUE);
     }
     pub fn handleKeys(self: *Snake, key: i32) void {
         _ = switch (key) {
